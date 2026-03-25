@@ -7,14 +7,95 @@ import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+
+const LOGO_SRC = "/field-dream-logo.svg";
+const LOGO_SCALE = 0.24;
+const LOGO_PADDING_SCALE = 0.04;
+const LOGO_RADIUS_SCALE = 0.03;
+
+function loadImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    image.src = src;
+  });
+}
+
+function drawRoundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+
+  context.beginPath();
+  context.moveTo(x + safeRadius, y);
+  context.arcTo(x + width, y, x + width, y + height, safeRadius);
+  context.arcTo(x + width, y + height, x, y + height, safeRadius);
+  context.arcTo(x, y + height, x, y, safeRadius);
+  context.arcTo(x, y, x + width, y, safeRadius);
+  context.closePath();
+}
+
+async function renderQrWithLogo({
+  canvas,
+  content,
+  size,
+  fgColor,
+  bgColor,
+}: {
+  canvas: HTMLCanvasElement;
+  content: string;
+  size: number;
+  fgColor: string;
+  bgColor: string;
+}) {
+  await QRCode.toCanvas(canvas, content, {
+    width: size,
+    color: { dark: fgColor, light: bgColor },
+    errorCorrectionLevel: "H",
+    margin: 2,
+  });
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Canvas context not available");
+  }
+
+  try {
+    const logo = await loadImage(LOGO_SRC);
+    const logoSize = Math.floor(size * LOGO_SCALE);
+    const padding = Math.max(10, Math.floor(size * LOGO_PADDING_SCALE));
+    const frameSize = logoSize + padding * 2;
+    const frameX = (size - frameSize) / 2;
+    const frameY = (size - frameSize) / 2;
+    const radius = Math.floor(size * LOGO_RADIUS_SCALE);
+
+    context.fillStyle = bgColor;
+    drawRoundedRect(context, frameX, frameY, frameSize, frameSize, radius);
+    context.fill();
+
+    context.drawImage(
+      logo,
+      frameX + padding,
+      frameY + padding,
+      logoSize,
+      logoSize,
+    );
+  } catch (error) {
+    console.warn("Logo overlay skipped:", error);
+  }
+
+  return canvas.toDataURL("image/png");
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -31,13 +112,25 @@ export default function DashboardPage() {
       toast.error("URL 또는 텍스트를 입력해 주세요.");
       return;
     }
+
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      toast.error("QR 캔버스를 초기화하지 못했습니다.");
+      return;
+    }
+
     setLoading(true);
+
     try {
-      const dataUrl = await QRCode.toDataURL(url, {
-        width: size,
-        color: { dark: fgColor, light: bgColor },
-        errorCorrectionLevel: "H",
+      const dataUrl = await renderQrWithLogo({
+        canvas,
+        content: url,
+        size,
+        fgColor,
+        bgColor,
       });
+
       setQrDataUrl(dataUrl);
       toast.success("QR 코드가 생성되었습니다!");
     } catch {
@@ -97,8 +190,12 @@ export default function DashboardPage() {
 
                 <Tabs defaultValue="basic">
                   <TabsList className="w-full">
-                    <TabsTrigger value="basic" className="flex-1">기본</TabsTrigger>
-                    <TabsTrigger value="advanced" className="flex-1">고급</TabsTrigger>
+                    <TabsTrigger value="basic" className="flex-1">
+                      기본
+                    </TabsTrigger>
+                    <TabsTrigger value="advanced" className="flex-1">
+                      고급
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent value="basic" className="space-y-4 pt-2">
                     <div className="space-y-2">
@@ -126,7 +223,9 @@ export default function DashboardPage() {
                           onChange={(e) => setFgColor(e.target.value)}
                           className="h-10 w-16 cursor-pointer rounded border"
                         />
-                        <span className="text-sm text-muted-foreground">{fgColor}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {fgColor}
+                        </span>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -139,7 +238,9 @@ export default function DashboardPage() {
                           onChange={(e) => setBgColor(e.target.value)}
                           className="h-10 w-16 cursor-pointer rounded border"
                         />
-                        <span className="text-sm text-muted-foreground">{bgColor}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {bgColor}
+                        </span>
                       </div>
                     </div>
                   </TabsContent>
@@ -152,6 +253,9 @@ export default function DashboardPage() {
                 >
                   {loading ? "생성 중..." : "QR 코드 생성"}
                 </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  생성된 QR 코드 중앙에 브랜드 로고가 자동으로 삽입됩니다.
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -170,18 +274,26 @@ export default function DashboardPage() {
                       src={qrDataUrl}
                       alt="생성된 QR 코드"
                       className="rounded-lg shadow-md"
-                      style={{ width: Math.min(size, 280), height: Math.min(size, 280) }}
+                      style={{
+                        width: Math.min(size, 280),
+                        height: Math.min(size, 280),
+                      }}
                     />
-                    <Button onClick={downloadQR} variant="outline" className="w-full">
+                    <Button
+                      onClick={downloadQR}
+                      variant="outline"
+                      className="w-full"
+                    >
                       PNG 다운로드
                     </Button>
-                    <canvas ref={canvasRef} className="hidden" />
                   </>
                 ) : (
                   <div className="text-center text-muted-foreground">
                     <div className="text-6xl mb-4">📱</div>
                     <p className="text-sm">
-                      URL 또는 텍스트를 입력하고<br />QR 코드를 생성하세요
+                      URL 또는 텍스트를 입력하고
+                      <br />
+                      QR 코드를 생성하세요
                     </p>
                   </div>
                 )}
@@ -189,6 +301,7 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
+        <canvas ref={canvasRef} className="hidden" width={size} height={size} />
       </main>
     </div>
   );

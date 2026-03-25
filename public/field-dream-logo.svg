@@ -1,0 +1,20 @@
+<svg width="768" height="768" viewBox="0 0 768 768" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="384" cy="384" r="378" stroke="black" stroke-width="6"/>
+  <circle cx="384" cy="384" r="356" stroke="black" stroke-width="3"/>
+  <g fill="black">
+    <rect x="334" y="124" width="8" height="474" rx="4"/>
+    <rect x="328" y="506" width="20" height="126" rx="6"/>
+    <path d="M341 132C377 136 407 145 455 166C460 168 463 173 463 179V250C463 255 459 259 454 258C412 248 386 242 341 242V132Z"/>
+    <path d="M341 132C376 137 400 147 435 158C453 164 459 180 456 196C452 214 437 224 419 221C389 216 369 213 341 213V132Z"/>
+    <path d="M364 179C372 170 382 165 391 171C385 179 386 188 393 196C401 188 413 186 418 196C420 200 420 205 418 210C416 217 410 223 404 228C399 232 395 236 392 242C389 237 386 234 382 231C373 225 364 216 360 206C356 196 358 186 364 179Z" fill="white"/>
+    <path d="M289 392L306 385L323 392V422L306 429L289 422V392Z"/>
+    <path d="M306 385L323 392L306 399L289 392L306 385Z"/>
+    <ellipse cx="306" cy="630" rx="29" ry="10" fill="white" stroke="black" stroke-width="4"/>
+    <path d="M252 683C278 681 304 680 330 680C382 680 438 683 491 690C458 706 420 714 384 714C340 714 294 704 252 683Z"/>
+    <path d="M230 678L244 660L258 678H230Z"/>
+    <path d="M510 678L524 660L538 678H510Z"/>
+  </g>
+  <path d="M321 663C341 661 361 660 381 660C411 660 441 661 471 665" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <path d="M356 725C344 725 335 716 335 704C335 692 344 683 356 683H376C383 683 390 685 395 689C401 684 409 682 418 682H429C440 682 448 691 448 702C448 715 438 725 425 725H356Z" fill="black"/>
+  <text x="384" y="718" text-anchor="middle" font-family="'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-size="32" font-weight="700" fill="black">✦ 필드의 꿈 ✦</text>
+</svg>
