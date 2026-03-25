@@ -63,15 +63,16 @@ npm install
 
 ### 2. 환경변수 설정
 
-`.env.local.example`을 복사해 `.env.local`을 생성하고 Supabase 키를 입력합니다:
+`.env.example`을 복사해 `.env.local`을 생성하고 Supabase 키를 입력합니다:
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 > ⚠️ `SERVICE_ROLE_KEY`는 절대 클라이언트 코드에 노출하지 마세요. 서버 전용으로만 사용합니다.
@@ -99,11 +100,14 @@ npm run dev
 ## 📦 Vercel 배포
 
 1. [Vercel](https://vercel.com)에서 이 저장소를 import
-2. **Environment Variables**에 아래 두 키 추가:
+2. **Environment Variables**에 아래 세 키 추가:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL`
 3. Supabase 대시보드 URL Configuration에 Vercel 배포 URL 등록
 4. Deploy!
+
+> 참고: 이 프로젝트는 NextAuth를 사용하지 않으므로 `NEXTAUTH_URL`, `NEXTAUTH_SECRET`는 필요하지 않습니다.
 
 ---
 
